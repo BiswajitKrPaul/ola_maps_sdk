@@ -2,20 +2,44 @@ plugins {
     id 'maven-publish'
 }
 
-group = 'com.github.BiswajitKrPaul'  // Replace 'haxon' with your GitHub username
+group = 'com.github.BiswajitKrPaul'  // Must match your GitHub username exactly
+version = '1.0.0'                   // Must match your Git tag (v1.6.0)
 
-tasks.register('publishAar', Copy) {
+// Task to prepare the AAR file
+tasks.register('prepareAar', Copy) {
     from("libs/OlaMapSdk-1.6.0.aar")
-    into("$buildDir/outputs/aar/")
-    rename { "ola-maps-sdk-${project.version}.aar" }
+    into("$buildDir/libs")
+    rename { "ola-maps-sdk-${version}.aar" }
 }
+
+// Ensure prepareAar runs before publishing
+publishToMavenLocal.dependsOn prepareAar
 
 publishing {
     publications {
-        aar(MavenPublication) {
-            artifactId = "ola-maps-sdk"
-            version = "1.6.0"
-            artifact("$buildDir/outputs/aar/ola-maps-sdk-${project.version}.aar")
+        maven(MavenPublication) {
+            // These coordinates must match what users will use to import
+            groupId = 'com.github.BiswajitKrPaul'
+            artifactId = 'ola-maps-sdk'
+            version = '1.0.0'
+            
+            // Reference the prepared AAR file
+            artifact("$buildDir/libs/ola-maps-sdk-${version}.aar") {
+                builtBy prepareAar
+            }
+            
+            // Generate minimal POM
+            pom {
+                name = 'Ola Maps SDK'
+                description = 'Flutter plugin for Ola Maps'
+                url = 'https://github.com/BiswajitKrPaul/ola_maps_sdk'
+                licenses {
+                    license {
+                        name = 'Your License'
+                        url = 'https://your-license-url.com'
+                    }
+                }
+            }
         }
     }
 }
