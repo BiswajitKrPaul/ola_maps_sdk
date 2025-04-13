@@ -1,20 +1,21 @@
 plugins {
-    id 'groovy'
+    id 'maven-publish'
 }
 
-group = 'com.github.BiswajitKrPaul'
-version = '1.0-SNAPSHOT'
+group = 'com.github.BiswajitKrPaul'  // Replace 'haxon' with your GitHub username
 
-repositories {
-    mavenCentral()
+tasks.register('publishAar', Copy) {
+    from("libs/OlaMapSdk-1.6.0.aar")
+    into("$buildDir/outputs/aar/")
+    rename { "ola-maps-sdk-${project.version}.aar" }
 }
 
-dependencies {
-    implementation 'org.apache.groovy:groovy:4.0.14'
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-}
-
-test {
-    useJUnitPlatform()
+publishing {
+    publications {
+        aar(MavenPublication) {
+            artifactId = "ola-maps-sdk"
+            version = "1.6.0"
+            artifact("$buildDir/outputs/aar/ola-maps-sdk-${project.version}.aar")
+        }
+    }
 }
